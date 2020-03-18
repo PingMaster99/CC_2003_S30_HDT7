@@ -2,19 +2,19 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 
 // https://www.baeldung.com/java-binary-tree
-public class BinaryTree {
+public class BinaryTree<E> {
 
     private Node root;
     public Node getRoot() {
         return root;
     }
 
-    public class Node {
-        String value;
+    public class Node<E> {
+        E value;
         Node left;
         Node right;
 
-        Node(String value) {
+        Node(E value) {
             this.value = value;
             right = null;
             left = null;
@@ -23,13 +23,14 @@ public class BinaryTree {
 
 
 
-    private BinaryTree() {
+    public BinaryTree() {
 
     }
 
-    public static BinaryTree generateTree(String document) {
-        BinaryTree binaryTree = new BinaryTree();
 
+    public static BinaryTree<String> generateTree(String document) {
+        BinaryTree<String> binaryTree = new BinaryTree<>();
+        Association<String, String> dictionaryMap = new Association<>();
         try {
             BufferedReader reader = new BufferedReader(new FileReader(document));
             String line;
@@ -45,14 +46,15 @@ public class BinaryTree {
     }
 
 
-    private Node insertElement(Node current, String value) {
+    private Node insertElement(Node current, E value) {
+        String valueString = String.valueOf(value);
 
         if(current == null) {
             return new Node(value);
         }
-        if(value.compareTo(current.value) < 0) {
+        if(valueString.compareTo(String.valueOf(current.value)) < 0) {
             current.left = insertElement(current.left, value);
-        } else if (value.compareTo(current.value) > 0) {
+        } else if (valueString.compareTo(String.valueOf(current.value)) > 0) {
             current.right = insertElement(current.right,value);
         } else {
             return current;
@@ -60,7 +62,7 @@ public class BinaryTree {
         return current;
     }
 
-    public void add(String entry) {
+    public void add(E entry) {
         root = insertElement(root, entry);
     }
 
@@ -70,5 +72,24 @@ public class BinaryTree {
             System.out.print(" " + node.value);
             inOrder(node.right);
         }
+    }
+
+    public boolean containsValue(E value) {
+        return containsNodeRecursive(root, value);
+    }
+
+    private boolean containsNodeRecursive(Node current, E value) {
+        String valueString = String.valueOf(value);
+        // A null node doesn't contain values
+        if (current == null) {
+            return false;
+        }
+        // Tree contains the element only if both node value and searched value are equal
+        if (valueString.compareTo(String.valueOf(current.value)) == 0) {
+            return true;
+        }
+        return valueString.compareTo(String.valueOf(current.value)) < 0
+                ? containsNodeRecursive(current.left, value)    // Value searched for is less than current value
+                : containsNodeRecursive(current.right, value);  // Value searched for is greater than current value
     }
 }
